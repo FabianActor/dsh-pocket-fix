@@ -9,10 +9,9 @@
 <p align="center"><a href="https://trendshift.io/repositories/166736?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-166736" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/166736/daily?language=JavaScript" alt="shaobeichen%2Fdsh-pocket | Trendshift" width="250" height="55"/></a></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="npm" src="https://img.shields.io/npm/v/dsh-pocket?color=4d6bfe&label=npm"></a>
-  <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="downloads" src="https://img.shields.io/npm/dm/dsh-pocket?color=4d6bfe"></a>
+  <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="npm (upstream)" src="https://img.shields.io/npm/v/dsh-pocket?color=4d6bfe&label=npm%20(upstream)"></a>
   <a href="https://github.com/FabianActor/dsh-pocket-fix/actions"><img alt="CI" src="https://github.com/FabianActor/dsh-pocket-fix/actions/workflows/test.yml/badge.svg"></a>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-GPL--2.0-red.svg"></a>
+  <a href="LICENSE"><img alt="License: GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-red.svg"></a>
   <a href="https://github.com/FabianActor/dsh-pocket-fix/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/FabianActor/dsh-pocket-fix"></a>
   <a href="https://awesome-dsh-plugin.com/zh/"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
 </p>
@@ -26,7 +25,19 @@
 > **这是 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket) 的维护分支。**
 > 原作者 [少北晨](https://github.com/shaobeichen)，代码、设计与绝大多数功能都出自上游；
 > 本分支由 [FabianActor](https://github.com/FabianActor) 维护，改动集中在「跟着 DSH 新版跑」的兼容修复，
-> **不发 npm 版本**（`dsh-pocket` 这个 npm 包仍是上游在发）。
+> **不发 npm 版本**（`dsh-pocket` 这个 npm 包仍是上游在发，停在 2.12.0）。
+
+## 这个分支改了什么
+
+上游长期没有合并 PR/issue，本分支只做「跟上 DSH 新版」的兼容修复，不扩展功能：
+
+| 改动 | 说明 |
+| --- | --- |
+| DSH 0.2.2 窄屏白屏（[#208](https://github.com/shaobeichen/dsh-pocket/issues/208)、[#209](https://github.com/shaobeichen/dsh-pocket/issues/209)） | 0.2.2 的 AppFrame 在视口 <768px 时往 frame 头部插入抽屉遮罩，原先按 `:first-child` / `:nth-child(2)` 定位的列选择器全部错位，主内容列被压成 0 宽（手机上一片空白）。改为按类名后缀 `[class*="centerCol"]` / `[class*="sidebarCol"]` 定位，并让宿主的遮罩与自带开合按钮各归各位 |
+| 本地安装不再提示 npm 更新 | 软链安装的版本号永远是 2.12.0，上游一发包就弹「一键更新」，点下去会把软链换成 npm 包、本地改动全丢。现在版本接口返回 `dev: true`，客户端跳过 registry 比对，更新接口直接拒绝 |
+| 署名与反馈入口 | 保留原作者署名与上游荣誉，新增「维护：FabianActor」一行，Star/issue 入口指向本仓库 |
+
+具体提交见 [提交历史](https://github.com/FabianActor/dsh-pocket-fix/commits/main)。
 
 ## 这是什么
 
@@ -61,7 +72,7 @@ DSH Pocket 就是干这个的：**装上它，手机扫个码，就能实时看�
 | 📁 文件浏览             | 移动端「文件浏览」入口需要宿主提供 explorer 面板（dsh-web-ui 组件）；官方 DSH 未内置时入口自动隐藏，不会出现"点了没反应"                                                           |
 | 🗜️ 传输压缩             | 大 JSON 响应自动 gzip/brotli（长会话 17MB → ~1MB，brotli 质量 6：快且省流量），手机加载更快、更省流量                                                                              |
 | 🔁 隧道自动恢复         | DSH 重启后自动重新拉起之前开着的公网隧道，无需手动重开                                                                                                                             |
-| 🧩 零依赖安装           | 一个 npm 包、一个设置页，没有核心/适配器要分开装；无需账号、无需服务器                                                                                                             |
+| 🧩 零依赖安装           | 一个包、一个设置页，没有核心/适配器要分开装；无需账号、无需服务器                                                                                                                   |
 
 ## 🚀 怎么用
 
@@ -79,12 +90,25 @@ npm install -g @deepseek-ai/dsh     # 全局安装；验证：dsh --version
 ```
 
 ```sh
-# 1. 装插件（一个包全都有）
-dsh plugin --profile web add dsh-pocket -w
+# 1. 取代码（本分支不发 npm 包，直接装仓库）
+git clone https://github.com/FabianActor/dsh-pocket-fix
+cd dsh-pocket-fix && npm install        # 插件运行时要用自己的 node_modules，别跳过
 
-# 2. 重启 dsh web
-npx @deepseek-ai/dsh web
+# 2. 装进 web profile（传绝对路径；末尾 -w 是 pnpm workspace 根的要求）
+#    macOS / Linux:
+dsh plugin --profile web add "$(pwd)" -w
+#    Windows PowerShell:
+#    dsh plugin --profile web add (Get-Location).Path -w
+
+# 3. 重启 dsh web
+dsh web
 ```
+
+> 装完后 `~/.dsh/profiles/web/node_modules/dsh-pocket` 是指向仓库的软链，之后改代码重启即生效（见 [LOCAL-DEV.md](./LOCAL-DEV.md)）。
+>
+> 不想留仓库？也可以 `dsh plugin --profile web add FabianActor/dsh-pocket-fix -w` 让 pnpm 直接从 GitHub 拉一份，但你将失去 `git pull` 之外的更新手段。
+>
+> 换成上游 npm 版（= 2.12.0，DSH 0.2.2 下会白屏）：`dsh plugin --profile web add dsh-pocket -w`。
 
 ### 局域网（同一 WiFi）
 
@@ -102,7 +126,7 @@ npx @deepseek-ai/dsh web
 
 同一页点「**开启公网访问**」→ **每次都会先弹出安全免责声明**，勾选「我已知情」后才能开启（公司/涉密网络请先确认合规）→ 等隧道建立（首次会下载 cloudflared，macOS/Linux 走清华镜像秒下）→ 手机扫「🌐 公网」二维码 → 打开链接**输入访问密码**（密码显示在设置页公网区块，默认是**每次开启公网变新的 8 位随机密码**，也可点「自定义」设成 8–64 位固定密码——英文字母大小写或数字，自定义后不再换新）→ 人在外面（4G/公司网）也能访问。
 
-> 更新到新版本：`dsh plugin --profile web update dsh-pocket --latest -w`（跨大版本时 `--latest` 是必须的，`^0.x` 范围不会自动升到 1.x）。
+> **更新到新版本**：`cd dsh-pocket-fix && git pull`，然后重启 `dsh web`。本分支是软链/路径安装，插件内的「一键更新」只对 npm 包有意义，现在会直接拒绝执行（旧版本点下去会把软链换成 npm 包，本地改动全丢）。
 
 ### 公网固定域名（命名隧道，可选）
 
@@ -139,12 +163,12 @@ npx @deepseek-ai/dsh web
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dsh: command not found` / 提示 DSH 未定义  | dsh CLI 没装：`npm install -g @deepseek-ai/dsh`，或命令前加 `npx @deepseek-ai/dsh`                                                                                                                                                                                                                                                                      |
 | `ERR_PNPM_ADDING_TO_ROOT`                   | pnpm 9 对 workspace 根的限制：安装/更新命令**末尾加 `-w`**（`--workspace-root`）                                                                                                                                                                                                                                                                        |
-| 装完/更新了但界面没变化                     | **必须重启 `dsh web`** 才生效；运行中的进程仍加载旧代码                                                                                                                                                                                                                                                                                                 |
+| 装完/更新了但界面没变化                     | **必须重启 `dsh web`** 才生效；运行中的进程仍加载旧代码。改的是 `client/` 还得先 `node client/build.mjs`（本分支的 `client/client.js` 已带构建产物，正常 `git pull` 后不用自己 build）                                                                 |
 | `listen EADDRINUSE ... :3081`               | 旧 dsh-pocket 进程还占着端口：macOS/Linux `lsof -ti :3081 \| xargs kill -9`；Windows `netstat -ano \| findstr :3081`（找 LISTENING 的 PID）→ `taskkill /PID <PID> /F`，后重试                                                                                                                                                                           |
 | 想换端口（issue #70）                       | 插件模式：在 `$DSH_HOME/dsh-pocket/settings.json` 写 `"proxyPort": 3082` 后重启 `dsh web`。CLI 模式：`dsh-pocket --port 3082`。端口被占会报 `EADDRINUSE`，杀掉旧进程或换一个端口                                                                                                                                                                        |
 | 想给访客一个临时密码                        | 暂不支持：issue #69 的「临时访问 PIN」功能已在 2.6.x 移除（撤销时会崩）。现在分享访问：把主密码或 `?token=<主密码>` 链接发给对方，用完在设置页点「刷新」换掉即可                                                                                                                                                                                        |
 | Linux 服务器装不上 cloudflared（issue #45） | 远程 Linux 国内/企业网下所有 CDN 源（GitHub/ghproxy/gh.ddlc/gh-proxy）都连不上时：在服务器上手动装 `cloudflared`（如 `apt install cloudflared`、`dnf install cloudflared`、或下载 tgz 解压到任意目录），然后在 `$DSH_HOME/dsh-pocket/settings.json` 加 `"cloudflaredPath": "/path/to/cloudflared"`，重启 `dsh web` 后插件直接调用它，**不再走自动下载** |
-| 版本停在 0.x 升不上去                       | `^0.x` 范围不允许升到 1.x：更新用 `--latest`（`dsh plugin --profile web update dsh-pocket --latest -w`）                                                                                                                                                                                                                                                |
+| 想更新本分支                                 | `cd dsh-pocket-fix && git pull` → 重启 `dsh web`。插件内「一键更新」对本分支会拒绝执行（软链/Git 安装不走 npm）；它只对上游 npm 包有意义：`dsh plugin --profile web update dsh-pocket --latest -w`（`^0.x` 范围到不了 1.x，`--latest` 是必须的）                                                                                                          |
 | 公网 `error 1033`                           | 见下方「公网隧道常见问题」——多半是本机代理/VPN（Clash 等 TUN 模式）掐断了隧道                                                                                                                                                                                                                                                                           |
 | 点「重启 dsh web」后页面提示进程在后台运行  | 自重启的新进程是 detached 后台进程（不挂终端），是页内更新的标准做法；停止它：macOS/Linux `lsof -ti :3080 \| xargs kill -9`；Windows `netstat -ano \| findstr :3080` → `taskkill /PID <PID> /F`（日志在 `$DSH_HOME` 下 `dsh-pocket-restart-*.log`）                                                                                                     |
 
@@ -211,10 +235,12 @@ npx @deepseek-ai/dsh web
 ```sh
 npm install
 node client/build.mjs   # 改 client/ 后重新打包
-npm test                # 代理 / 认证 / 压缩 / 隧道 / 服务 / RPC / 设置（109 测试）
+npm test                # 代理 / 认证 / 压缩 / 隧道 / 服务 / RPC / 设置（202 测试；Windows 下 4 条隧道用例会失败，见下）
 ```
 
 **改完想在本机先试？** 不用发版：把插件换成指向本地仓库的软链，重启 dsh web 就是本地代码。完整步骤（含怎么换回 npm 官方版本）见 [LOCAL-DEV.md](./LOCAL-DEV.md)。
+
+**Windows 上那 4 条失败用例**（`test/tunnel-args.test.js`）：测试伪造了一个 `cloudflared` 脚本（`#!/usr/bin/env node`，无扩展名）来断言传给它的参数，Windows 无法 spawn 这种文件，报 `ENOENT`。属平台限制，与代码无关；macOS/Linux 上全过。
 
 ## 🤝 致谢
 

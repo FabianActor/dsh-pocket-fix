@@ -32,7 +32,7 @@ ls -l dsh-pocket
 
 ```sh
 node client/build.mjs     # 只改后端可跳过
-npm test                  # 建议顺手跑一遍（当前 109 个用例）
+npm test                  # 建议顺手跑一遍（当前 202 个用例；Windows 下 tunnel-args 有 4 条会因 spawn 限制失败）
 ```
 
 ### 重启 dsh web

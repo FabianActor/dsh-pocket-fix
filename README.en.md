@@ -9,10 +9,9 @@
 <p align="center"><a href="https://trendshift.io/repositories/166736?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-166736" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/166736/daily?language=JavaScript" alt="shaobeichen%2Fdsh-pocket | Trendshift" width="250" height="55"/></a></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="npm" src="https://img.shields.io/npm/v/dsh-pocket?color=4d6bfe&label=npm"></a>
-  <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="downloads" src="https://img.shields.io/npm/dm/dsh-pocket?color=4d6bfe"></a>
+  <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="npm (upstream)" src="https://img.shields.io/npm/v/dsh-pocket?color=4d6bfe&label=npm%20(upstream)"></a>
   <a href="https://github.com/FabianActor/dsh-pocket-fix/actions"><img alt="CI" src="https://github.com/FabianActor/dsh-pocket-fix/actions/workflows/test.yml/badge.svg"></a>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-GPL--2.0-red.svg"></a>
+  <a href="LICENSE"><img alt="License: GPL-2.0" src="https://img.shields.io/badge/license-GPL--2.0-red.svg"></a>
   <a href="https://github.com/FabianActor/dsh-pocket-fix/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/FabianActor/dsh-pocket-fix"></a>
   <a href="https://awesome-dsh-plugin.com"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
 </p>
@@ -26,7 +25,19 @@
 > **This is a maintenance fork of [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket).**
 > Original author: [少北晨](https://github.com/shaobeichen) — the code, the design, and the vast majority of the
 > features come from upstream. Maintained here by [FabianActor](https://github.com/FabianActor), whose changes focus on
-> keeping up with new DSH releases. **Not published to npm** (the `dsh-pocket` package on npm is still upstream's).
+> keeping up with new DSH releases. **Not published to npm** (the `dsh-pocket` package on npm is still upstream's, frozen at 2.12.0).
+
+## What this branch changes
+
+Upstream hasn't merged PRs or issues in a long while, so this branch only carries "keep it running on new DSH releases" fixes — no new features:
+
+| Change | Detail |
+| --- | --- |
+| DSH 0.2.2 narrow-screen blank page ([#208](https://github.com/shaobeichen/dsh-pocket/issues/208), [#209](https://github.com/shaobeichen/dsh-pocket/issues/209)) | On viewports narrower than 768px, 0.2.2's AppFrame now inserts a drawer mask as the frame's *first* child, so the old `:first-child` / `:nth-child(2)` column selectors all matched the wrong boxes and the content column collapsed to 0px wide (blank screen on phones). Now located by class suffix (`[class*="centerCol"]` / `[class*="sidebarCol"]`), with the host mask and its built-in opener button handled explicitly |
+| No more bogus npm update prompt for local installs | A symlinked install always reports version 2.12.0, so as soon as upstream published anything the panel offered "one-click update" — which runs `dsh plugin update --latest` and replaces the symlink with the npm package, losing every local change. The version endpoint now reports `dev: true`, the client skips the registry check, and the update endpoint refuses outright |
+| Attribution and feedback links | Original author credit and upstream honours kept; a "Maintained by FabianActor" line added, Star/issue links point at this repo |
+
+Exact commits: [commit history](https://github.com/FabianActor/dsh-pocket-fix/commits/main).
 
 ## What is this
 
@@ -61,7 +72,7 @@ What it looks like — the phone shows the exact same UI as your computer, live:
 | 📁 File browser              | The mobile "Files" entries need a host-side explorer panel (a dsh-web-ui component); on stock DSH without it the entries are auto-hidden instead of doing nothing                                                                                                                 |
 | 🗜️ Transfer compression      | Large JSON responses are gzip/brotli'd on the fly (17MB session history → ~1MB; brotli quality 6: fast and bandwidth-friendly) — faster loads, less mobile data                                                                                                                   |
 | 🔁 Tunnel auto-restore       | After a DSH restart the previously-running public tunnel comes back automatically                                                                                                                                                                                                 |
-| 🧩 Zero-dependency install   | One npm package, one settings tab — no core/adapter split, no account, no server                                                                                                                                                                                                  |
+| 🧩 Zero-dependency install   | One package, one settings tab — no core/adapter split, no account, no server                                                                                                                                                                                                  |
 
 ## 🚀 Usage
 
@@ -79,12 +90,25 @@ npm install -g @deepseek-ai/dsh     # global install; verify: dsh --version
 ```
 
 ```sh
-# 1. Install the plugin (everything in one package)
-dsh plugin --profile web add dsh-pocket -w
+# 1. Get the code (this branch is not on npm — install straight from the repo)
+git clone https://github.com/FabianActor/dsh-pocket-fix
+cd dsh-pocket-fix && npm install        # the plugin uses its own node_modules at runtime; don't skip
 
-# 2. Restart dsh web
-npx @deepseek-ai/dsh web
+# 2. Install into the web profile (absolute path; -w is required by pnpm workspaces)
+#    macOS / Linux:
+dsh plugin --profile web add "$(pwd)" -w
+#    Windows PowerShell:
+#    dsh plugin --profile web add (Get-Location).Path -w
+
+# 3. Restart dsh web
+dsh web
 ```
+
+> Afterwards `~/.dsh/profiles/web/node_modules/dsh-pocket` is a symlink to the checkout, so edits take effect on restart (see [LOCAL-DEV.md](./LOCAL-DEV.md)).
+>
+> Rather not keep a checkout? `dsh plugin --profile web add FabianActor/dsh-pocket-fix -w` lets pnpm fetch it from GitHub directly — but then `git pull` is out and updating means reinstalling.
+>
+> Switching back to the upstream npm package (= 2.12.0, blank screen on DSH 0.2.2): `dsh plugin --profile web add dsh-pocket -w`.
 
 ### LAN (same Wi-Fi)
 
@@ -102,7 +126,7 @@ Settings → **Phone access** → scan the "📶 LAN" QR code → enter the **LA
 
 On the same page click "**Enable anywhere**" → **a security disclaimer pops up every time — check "I understand and agree" to proceed** (on a corporate/classified network, confirm compliance first) → wait for the tunnel (first run downloads cloudflared; macOS/Linux use the Tsinghua mirror, seconds) → scan the "🌐 Public" QR code → the phone opens the link and **enters the access PIN** (shown in the settings page's public section; the default is an **8-digit random PIN rotated on every tunnel start**, or use **Customize** for a fixed 8–64-character alphanumeric PIN that is never rotated) → works from outside (4G / office network).
 
-> Upgrading: `dsh plugin --profile web update dsh-pocket --latest -w` (`--latest` is required across major versions — a `^0.x` range won't auto-jump to 1.x).
+> **Upgrading**: `cd dsh-pocket-fix && git pull`, then restart `dsh web`. The in-panel "one-click update" only makes sense for npm installs and now refuses to run for this branch (it used to replace the symlink with the npm package and wipe local changes).
 
 ### Fixed public hostname (named tunnel, optional)
 
@@ -143,7 +167,7 @@ Note: in named-tunnel mode the public PIN is **not auto-rotated** (the address i
 | Want a different port (issue #70)                                               | Plugin mode: write `"proxyPort": 3082` into `$DSH_HOME/dsh-pocket/settings.json` and restart `dsh web`. CLI mode: `dsh-pocket --port 3082`. If the port is taken you'll get `EADDRINUSE` — kill the old process or pick another one                                                                                                                                                                                              |
 | Issue a temporary PIN to a guest                                                | Not available: the temporary access PIN feature (issue #69) was removed in 2.6.x (it crashed on revoke). To share access, send the main PIN or a `?token=<main PIN>` link, then hit "Refresh" in Settings once the guest is done                                                                                                                                                                                                 |
 | cloudflared install fails on a remote Linux server (issue #45)                  | If all CDN sources (GitHub / ghproxy / gh.ddlc / gh-proxy) are unreachable on a remote Linux host, install `cloudflared` yourself (e.g. `apt install cloudflared`, `dnf install cloudflared`, or download the tgz and unpack it), then add `"cloudflaredPath": "/path/to/cloudflared"` into `$DSH_HOME/dsh-pocket/settings.json` and restart `dsh web`. The plugin will then use that binary directly and skip the auto-download |
-| Version stuck below 1.x                                                         | `^0.x` ranges never jump to 1.x: update with `--latest` (`dsh plugin --profile web update dsh-pocket --latest -w`)                                                                                                                                                                                                                                                                                                               |
+| Updating this branch                                                           | `cd dsh-pocket-fix && git pull`, restart `dsh web`. The in-panel "one-click update" refuses to run here (symlink/Git installs never go through npm); for the upstream npm package it still applies: `dsh plugin --profile web update dsh-pocket --latest -w` (`^0.x` never reaches 1.x, so `--latest` is required)                                                                                                                       |
 | Public `error 1033`                                                             | See "Public tunnel troubleshooting" below — usually a local proxy/VPN (Clash etc. TUN mode) killing the tunnel                                                                                                                                                                                                                                                                                                                   |
 | After "Restart dsh web", the page says the process is running in the background | The new process from in-page self-restart is a detached background process (not attached to your terminal) — that's the standard way to apply updates in-page; stop it: macOS/Linux `lsof -ti :3080 \| xargs kill -9`; Windows `netstat -ano \| findstr :3080` → `taskkill /PID <PID> /F` (logs under `$DSH_HOME` as `dsh-pocket-restart-*.log`)                                                                                 |
 
@@ -204,10 +228,12 @@ Such tools take over all traffic and often cut cloudflared's tunnel-edge connect
 ```sh
 npm install
 node client/build.mjs   # rebuild after editing client/
-npm test                # proxy / auth / compression / tunnel / service / RPC / settings (109 tests)
+npm test                # proxy / auth / compression / tunnel / service / RPC / settings (202 tests; 4 tunnel cases fail on Windows, see below)
 ```
 
 **Want to try your changes locally without publishing?** Point the installed plugin at your local checkout with a symlink and restart dsh web. Full steps (including switching back to the npm release) are in [LOCAL-DEV.md](./LOCAL-DEV.md).
+
+**The 4 Windows failures** (`test/tunnel-args.test.js`) fake a `cloudflared` script (`#!/usr/bin/env node`, no extension) to assert the arguments passed to it; Windows can't spawn such a file and reports `ENOENT`. Platform limitation, unrelated to the code — all green on macOS/Linux.
 
 ## 🤝 Credits
 
