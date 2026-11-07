@@ -69,14 +69,24 @@
       "platform": "web"
     }
   },
+  "author": {
+    "name": "少北晨",
+    "url": "https://github.com/shaobeichen"
+  },
+  "contributors": [
+    {
+      "name": "FabianActor",
+      "url": "https://github.com/FabianActor"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shaobeichen/dsh-pocket.git"
+    "url": "git+https://github.com/FabianActor/dsh-pocket-fix.git"
   },
   "bugs": {
-    "url": "https://github.com/shaobeichen/dsh-pocket/issues"
+    "url": "https://github.com/FabianActor/dsh-pocket-fix/issues"
   },
-  "homepage": "https://github.com/shaobeichen/dsh-pocket",
+  "homepage": "https://github.com/FabianActor/dsh-pocket-fix",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

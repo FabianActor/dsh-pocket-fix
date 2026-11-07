@@ -2013,8 +2013,9 @@ var zh2 = {
   "section": "\u624B\u673A\u8BBF\u95EE",
   "title": "\u{1F4F1} \u624B\u673A\u8BBF\u95EE",
   "subtitle": "\u624B\u673A\u626B\u7801\u6253\u5F00\u7684\u5C31\u662F\u7535\u8111\u4E0A\u7684\u8FD9\u4E2A\u754C\u9762\uFF0C\u5B9E\u65F6\u540C\u6B65",
-  "developer": "\u5F00\u53D1\u8005\uFF1A\u7A0B\u5E8F\u5458\u5C11\u5317\u6668",
-  "starAsk": "\u2B50 \u987A\u624B\u7559\u9897 Star\uFF0C\u4F5C\u8005\u80FD\u9AD8\u5174\u4E00\u6574\u5929",
+  "developer": "\u539F\u4F5C\u8005\uFF1A\u7A0B\u5E8F\u5458\u5C11\u5317\u6668",
+  "maintainer": "\u7EF4\u62A4\uFF1AFabianActor",
+  "starAsk": "\u2B50 \u987A\u624B\u7559\u9897 Star\uFF0C\u7EF4\u62A4\u8005\u80FD\u9AD8\u5174\u4E00\u6574\u5929",
   "starCta": "\u884C\uFF0C\u7ED9\u4F60\u4E00\u9897 Star",
   "restarted": "\u{1F504} \u5DF2\u91CD\u542F",
   "ok": "\u77E5\u9053\u4E86",
@@ -2111,8 +2112,9 @@ var en2 = {
   "section": "Phone access",
   "title": "\u{1F4F1} Phone access",
   "subtitle": "The phone shows this exact screen, live",
-  "developer": "Developer: \u5C11\u5317\u6668 (shaobeichen)",
-  "starAsk": "\u2B50 Drop a Star if it helped \u2014 it makes the author\u2019s day",
+  "developer": "Original author: \u5C11\u5317\u6668 (shaobeichen)",
+  "maintainer": "Maintained by FabianActor",
+  "starAsk": "\u2B50 Drop a Star if it helped \u2014 it makes the maintainer\u2019s day",
   "starCta": "\u2605 Give a Star",
   "restarted": "\u{1F504} Restarted",
   "ok": "Got it",
@@ -2294,10 +2296,9 @@ function PocketSettingsTab({ rpcCall, t }) {
     const check = async () => {
       try {
         const v = await call(POCKET_ENDPOINTS.version, {});
-        const meta = await (await fetch("https://registry.npmjs.org/dsh-pocket/latest", { cache: "no-store" })).json();
+        const latest = v.dev ? null : (await (await fetch("https://registry.npmjs.org/dsh-pocket/latest", { cache: "no-store" })).json())?.version;
         if (!alive) return;
-        const latest = typeof meta?.version === "string" ? meta.version : null;
-        if (latest && v.current && compareVersions(latest, v.current) > 0) {
+        if (typeof latest === "string" && latest && v.current && compareVersions(latest, v.current) > 0) {
           setUpdateInfo({ current: v.current, latest, updating: false, result: null });
         } else if (v.current && v.loaded && compareVersions(v.current, v.loaded) > 0) {
           setUpdateInfo({ current: v.current, latest: v.current, updating: false, result: "ok", updated: true });
@@ -2574,10 +2575,11 @@ function PocketSettingsTab({ rpcCall, t }) {
         "div",
         { style: { fontSize: 12, color: "var(--dsw-alias-label-tertiary,#8b93a1)", textAlign: "right" } },
         (0, import_react2.createElement)("div", { style: { whiteSpace: "nowrap" } }, t("developer")),
+        (0, import_react2.createElement)("div", { style: { whiteSpace: "nowrap" } }, t("maintainer")),
         (0, import_react2.createElement)("div", { style: { whiteSpace: "nowrap" } }, t("starAsk")),
         (0, import_react2.createElement)(
           "a",
-          { href: "https://github.com/shaobeichen/dsh-pocket", target: "_blank", rel: "noreferrer", style: { color: "var(--dsw-alias-brand-primary,#4f6ef7)", fontSize: 12, lineHeight: 1.6, textDecoration: "underline" } },
+          { href: "https://github.com/FabianActor/dsh-pocket-fix", target: "_blank", rel: "noreferrer", style: { color: "var(--dsw-alias-brand-primary,#4f6ef7)", fontSize: 12, lineHeight: 1.6, textDecoration: "underline" } },
           t("starCta")
         )
       )
@@ -2881,7 +2883,7 @@ function PocketSettingsTab({ rpcCall, t }) {
       { style: { ...styles.block, textAlign: "center" } },
       (0, import_react2.createElement)(
         "a",
-        { href: "https://github.com/shaobeichen/dsh-pocket/issues", target: "_blank", rel: "noreferrer", style: { fontSize: 12, color: "var(--dsw-alias-label-secondary,#6b7280)", textDecoration: "none" } },
+        { href: "https://github.com/FabianActor/dsh-pocket-fix/issues", target: "_blank", rel: "noreferrer", style: { fontSize: 12, color: "var(--dsw-alias-label-secondary,#6b7280)", textDecoration: "none" } },
         t("feedback")
       )
     )

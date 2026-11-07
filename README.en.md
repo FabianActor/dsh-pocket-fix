@@ -11,17 +11,22 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="npm" src="https://img.shields.io/npm/v/dsh-pocket?color=4d6bfe&label=npm"></a>
   <a href="https://www.npmjs.com/package/dsh-pocket"><img alt="downloads" src="https://img.shields.io/npm/dm/dsh-pocket?color=4d6bfe"></a>
-  <a href="https://github.com/shaobeichen/dsh-pocket/actions"><img alt="CI" src="https://github.com/shaobeichen/dsh-pocket/actions/workflows/npm-publish.yml/badge.svg"></a>
+  <a href="https://github.com/FabianActor/dsh-pocket-fix/actions"><img alt="CI" src="https://github.com/FabianActor/dsh-pocket-fix/actions/workflows/test.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-GPL--2.0-red.svg"></a>
-  <a href="https://github.com/shaobeichen/dsh-pocket/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/shaobeichen/dsh-pocket"></a>
+  <a href="https://github.com/FabianActor/dsh-pocket-fix/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/FabianActor/dsh-pocket-fix"></a>
   <a href="https://awesome-dsh-plugin.com"><img alt="Awesome DSH Plugin" src="https://awesome-dsh-plugin.com/badge.svg"></a>
 </p>
 
 > Put **DeepSeek Harness in your pocket**: one package, one settings tab — scan a QR code and your phone shows exactly what's on your computer screen, live, from anywhere.
 
 <p align="center">
-  ⭐ A Star would make the author's day &nbsp;·&nbsp; <a href="https://github.com/shaobeichen/dsh-pocket">Here, take one</a>
+  ⭐ A Star would make the maintainer's day &nbsp;·&nbsp; <a href="https://github.com/FabianActor/dsh-pocket-fix">Here, take one</a>
 </p>
+
+> **This is a maintenance fork of [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket).**
+> Original author: [少北晨](https://github.com/shaobeichen) — the code, the design, and the vast majority of the
+> features come from upstream. Maintained here by [FabianActor](https://github.com/FabianActor), whose changes focus on
+> keeping up with new DSH releases. **Not published to npm** (the `dsh-pocket` package on npm is still upstream's).
 
 ## What is this
 
@@ -206,8 +211,10 @@ npm test                # proxy / auth / compression / tunnel / service / RPC / 
 
 ## 🤝 Credits
 
+- The project itself comes from [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket), by [少北晨](https://github.com/shaobeichen)
 - Mobile adaptation ported from [mexiaosqwq/dsh-web-mobile](https://github.com/mexiaosqwq/dsh-web-mobile) (MIT)
 - Public tunnel powered by [cloudflared](https://github.com/cloudflare/cloudflared)
+- The DSH 0.2.2 narrow-screen blank page was diagnosed and fixed by the community: [PR #200](https://github.com/shaobeichen/dsh-pocket/pull/200) ([@MoRanYue](https://github.com/MoRanYue)), [#207](https://github.com/shaobeichen/dsh-pocket/issues/207) ([@Jackyshij](https://github.com/Jackyshij)), [#208](https://github.com/shaobeichen/dsh-pocket/issues/208) ([@seudut](https://github.com/seudut))
 
 ## 📄 License
 
@@ -217,4 +224,5 @@ npm test                # proxy / auth / compression / tunnel / service / RPC / 
 
 ---
 
-**Questions? Feedback welcome**: bugs, ideas, or feature requests — open an issue at [GitHub Issues](https://github.com/shaobeichen/dsh-pocket/issues) 🙏
+**Questions? Feedback welcome**: bugs, ideas, or feature requests — open an issue at [GitHub Issues](https://github.com/FabianActor/dsh-pocket-fix/issues) 🙏
+(Upstream discussion stays at [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket/issues).)

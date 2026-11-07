@@ -116,10 +116,11 @@ function PocketSettingsTab({ rpcCall, t }) {
     const check = async () => {
       try {
         const v = await call(POCKET_ENDPOINTS.version, {});
-        const meta = await (await fetch('https://registry.npmjs.org/dsh-pocket/latest', { cache: 'no-store' })).json();
+        // 本地安装（软链/路径）跳过 npm registry 比对：本地版本号不跟随 npm latest，
+        // 而一键更新会把软链换成 npm 包（lib/index.js isDevInstall）。仍需识别「已更新未重启」。
+        const latest = v.dev ? null : (await (await fetch('https://registry.npmjs.org/dsh-pocket/latest', { cache: 'no-store' })).json())?.version;
         if (!alive) return;
-        const latest = typeof meta?.version === 'string' ? meta.version : null;
-        if (latest && v.current && compareVersions(latest, v.current) > 0) {
+        if (typeof latest === 'string' && latest && v.current && compareVersions(latest, v.current) > 0) {
           setUpdateInfo({ current: v.current, latest, updating: false, result: null });
         } else if (v.current && v.loaded && compareVersions(v.current, v.loaded) > 0) {
           // 已更新未重启：显示「已更新，重启生效」+ 重启按钮
@@ -399,8 +400,9 @@ function PocketSettingsTab({ rpcCall, t }) {
       ),
       h('div', { style: { fontSize: 12, color: 'var(--dsw-alias-label-tertiary,#8b93a1)', textAlign: 'right' } },
         h('div', { style: { whiteSpace: 'nowrap' } }, t('developer')),
+        h('div', { style: { whiteSpace: 'nowrap' } }, t('maintainer')),
         h('div', { style: { whiteSpace: 'nowrap' } }, t('starAsk')),
-        h('a', { href: 'https://github.com/shaobeichen/dsh-pocket', target: '_blank', rel: 'noreferrer', style: { color: 'var(--dsw-alias-brand-primary,#4f6ef7)', fontSize: 12, lineHeight: 1.6, textDecoration: 'underline' } },
+        h('a', { href: 'https://github.com/FabianActor/dsh-pocket-fix', target: '_blank', rel: 'noreferrer', style: { color: 'var(--dsw-alias-brand-primary,#4f6ef7)', fontSize: 12, lineHeight: 1.6, textDecoration: 'underline' } },
           t('starCta')),
       ),
     ),
@@ -647,7 +649,7 @@ function PocketSettingsTab({ rpcCall, t }) {
 
     // 页面最底部：反馈入口
     h('div', { style: { ...styles.block, textAlign: 'center' } },
-      h('a', { href: 'https://github.com/shaobeichen/dsh-pocket/issues', target: '_blank', rel: 'noreferrer', style: { fontSize: 12, color: 'var(--dsw-alias-label-secondary,#6b7280)', textDecoration: 'none' } },
+      h('a', { href: 'https://github.com/FabianActor/dsh-pocket-fix/issues', target: '_blank', rel: 'noreferrer', style: { fontSize: 12, color: 'var(--dsw-alias-label-secondary,#6b7280)', textDecoration: 'none' } },
         t('feedback')),
     ),
   );
