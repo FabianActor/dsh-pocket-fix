@@ -2,13 +2,22 @@
 // 引入（client 侧是 esbuild 打进 bundle 的，测试里没有 DOM 可用）。
 
 /**
- * 抽屉本体：AppFrame 的第一个网格子元素，即被拉成抽屉的侧边栏列。
+ * 抽屉本体：被拉成抽屉的侧边栏列。
+ *
+ * 按类名后缀找，不按位置找。DSH 0.2.2-rc.1 的 AppFrame 在 <768px 会往 frame
+ * 开头插一个 `div[data-sidebar-mask]`，`> :first-child` 于是落在遮罩上 —— 与
+ * CSS 那边同一处错位，一起改成类名后缀（issue #208）。前缀哈希每次构建都变，
+ * 只认 `sidebarCol` 这段。
  * @type {string}
  */
-export const DRAWER_SELECTOR = '[data-mobile-nav="frame"] > :first-child'
+export const DRAWER_SELECTOR = '[data-mobile-nav="frame"] > [class*="sidebarCol"]'
 
-/** 抽屉开关（会话头部那颗按钮）——点它不该被"点抽屉外就关"二次触发。 */
-export const TOGGLE_SELECTOR = '[data-mobile-nav="toggle"]'
+/**
+ * 抽屉开关：会话头部那颗按钮，外加 0.2.2-rc.1 自带的官方开合按钮
+ * (`button[data-sidebar-opener]`)。两处都调 toggleSidebar()，不豁免的话
+ * "点抽屉外就关" 会再补一下，结果开了立刻又关。
+ */
+export const TOGGLE_SELECTOR = '[data-mobile-nav="toggle"], [data-sidebar-opener]'
 
 /**
  * 命中即视为导航的行：点它们要把屏幕让给刚打开的内容，所以顺带关抽屉。

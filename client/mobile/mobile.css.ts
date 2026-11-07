@@ -184,17 +184,24 @@ export const MOBILE_CSS = `
     padding-top: env(safe-area-inset-top, 0px) !important;
   }
 
-  /* 主内容列（第 2 个网格子元素）在官方样式里有显式 grid-column: 2——
-     网格被压缩成 [1fr, 0, 0] 后它会落在 0px 的第 2 轨，整个主界面被挤出
-     视口（只剩背景图）。必须显式把它拉回第 1 轨（issue #5）。
-     第 3 列（details）保持 0 轨即可，无需处理。 */
-  [data-mobile-nav="frame"] > :nth-child(2) {
+  /* 主内容列在官方样式里有显式 grid-column: 2——网格被压缩成 [1fr, 0, 0]
+     后它会落在 0px 的第 2 轨，整个主界面被挤出视口（只剩背景图）。必须显式
+     把它拉回第 1 轨（issue #5）。
+     第 3 列（details）保持 0 轨即可，无需处理。
+
+     用类名后缀定位而不是 > :nth-child(2)：DSH 0.2.2-rc.1 的 AppFrame 在
+     <768px 会往 frame 开头插一个 div[data-sidebar-mask]，子元素顺序变成
+     mask → sidebarCol → centerCol → ……，位置选择器于是整体错位一格，主内容
+     列换成侧边栏列、被压进 0 宽度（issue #208/#209，白屏）。类名后缀不受
+     新增兄弟节点影响。不带前导下划线：CSS Modules 的分隔符（hash_local
+     vs local_hash）是配置项，只认 centerCol 这段更稳（#207 实测同样命中）。 */
+  [data-mobile-nav="frame"] > [class*="centerCol"] {
     grid-column: 1 !important;
     grid-row: 1 !important;
     min-width: 0 !important;
   }
 
-  /* The sidebar column (first grid child) becomes a left drawer. The drawer
+  /* The sidebar column becomes a left drawer. The drawer
      hugs the sidebar content exactly (the wide sidebar carries an inline
      width, ~280px): a fixed 92vw box would leave a white strip where the
      container background shows beside the content.
@@ -216,8 +223,12 @@ export const MOBILE_CSS = `
      details pane 1000 and its full-screen frame ::after mask 1050 (issue
      #67: that mask sat on top of the 600 drawer and ate every tap). Still
      far under the fixed-position banners/toasts (z 9999) that float at the
-     viewport level. */
-  [data-mobile-nav="frame"] > :first-child {
+     viewport level.
+
+     Located by class-name suffix, not by "> :first-child" — 0.2.2-rc.1 puts
+     div[data-sidebar-mask] first whenever it enters drawer mode (viewport
+     < 768px), which would otherwise hand the drawer styling to the mask. */
+  [data-mobile-nav="frame"] > [class*="sidebarCol"] {
     position: absolute !important;
     inset: 0 auto 0 0 !important;
     width: max-content !important;
@@ -247,8 +258,27 @@ export const MOBILE_CSS = `
      overflow:hidden drawer to scrollLeft=102, and every static child (plus the
      fixed overlay) shifts 102px off-screen. With transform:none the overlay is
      viewport-anchored: it dims the full screen and the sheet sits at left:8. */
-  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > :first-child {
+  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > [class*="sidebarCol"] {
     transform: none !important;
+  }
+
+  /* The official drawer mask (0.2.2-rc.1) goes away: it paints a second
+     backdrop next to ours and, worse, its own click handler calls
+     toggleSidebar() — while the client's outside-tap handler already closed
+     the drawer on the same tap. Two toggles cancel out, so the drawer looked
+     like it would not close (issue #208). The mobile stylesheet renders its
+     own backdrop and the client handles the tap. */
+  [data-mobile-nav="frame"] > [data-sidebar-mask] {
+    display: none !important;
+  }
+
+  /* 0.2.2-rc.1 ships its own drawer opener (button[data-sidebar-opener] in the
+     frame's leading seat). Two openers plus our FAB on one phone screen is one
+     entry point too many — and the official one sits where the session header
+     used to keep clear. When the host renders it, ours stands down. */
+  [data-mobile-nav="frame"]:has([data-sidebar-opener]) [data-mobile-nav="toggle"],
+  [data-mobile-nav="frame"]:has([data-sidebar-opener]) [data-mobile-nav="fab"] {
+    display: none !important;
   }
 
   /* Kill a competing full-screen mask (issue #67).

@@ -217,8 +217,8 @@ var import_react = require("react");
 var primitives2 = __toESM(require("@deepseek-ai/dsh-client-ui-primitives"), 1);
 
 // client/mobile/nav-targets.mjs
-var DRAWER_SELECTOR = '[data-mobile-nav="frame"] > :first-child';
-var TOGGLE_SELECTOR = '[data-mobile-nav="toggle"]';
+var DRAWER_SELECTOR = '[data-mobile-nav="frame"] > [class*="sidebarCol"]';
+var TOGGLE_SELECTOR = '[data-mobile-nav="toggle"], [data-sidebar-opener]';
 var NAV_TARGETS = [
   "button[data-dsh-taskboard-entry]",
   "button[data-dsh-ssh-entry]",
@@ -813,17 +813,24 @@ var MOBILE_CSS = `
     padding-top: env(safe-area-inset-top, 0px) !important;
   }
 
-  /* \u4E3B\u5185\u5BB9\u5217\uFF08\u7B2C 2 \u4E2A\u7F51\u683C\u5B50\u5143\u7D20\uFF09\u5728\u5B98\u65B9\u6837\u5F0F\u91CC\u6709\u663E\u5F0F grid-column: 2\u2014\u2014
-     \u7F51\u683C\u88AB\u538B\u7F29\u6210 [1fr, 0, 0] \u540E\u5B83\u4F1A\u843D\u5728 0px \u7684\u7B2C 2 \u8F68\uFF0C\u6574\u4E2A\u4E3B\u754C\u9762\u88AB\u6324\u51FA
-     \u89C6\u53E3\uFF08\u53EA\u5269\u80CC\u666F\u56FE\uFF09\u3002\u5FC5\u987B\u663E\u5F0F\u628A\u5B83\u62C9\u56DE\u7B2C 1 \u8F68\uFF08issue #5\uFF09\u3002
-     \u7B2C 3 \u5217\uFF08details\uFF09\u4FDD\u6301 0 \u8F68\u5373\u53EF\uFF0C\u65E0\u9700\u5904\u7406\u3002 */
-  [data-mobile-nav="frame"] > :nth-child(2) {
+  /* \u4E3B\u5185\u5BB9\u5217\u5728\u5B98\u65B9\u6837\u5F0F\u91CC\u6709\u663E\u5F0F grid-column: 2\u2014\u2014\u7F51\u683C\u88AB\u538B\u7F29\u6210 [1fr, 0, 0]
+     \u540E\u5B83\u4F1A\u843D\u5728 0px \u7684\u7B2C 2 \u8F68\uFF0C\u6574\u4E2A\u4E3B\u754C\u9762\u88AB\u6324\u51FA\u89C6\u53E3\uFF08\u53EA\u5269\u80CC\u666F\u56FE\uFF09\u3002\u5FC5\u987B\u663E\u5F0F
+     \u628A\u5B83\u62C9\u56DE\u7B2C 1 \u8F68\uFF08issue #5\uFF09\u3002
+     \u7B2C 3 \u5217\uFF08details\uFF09\u4FDD\u6301 0 \u8F68\u5373\u53EF\uFF0C\u65E0\u9700\u5904\u7406\u3002
+
+     \u7528\u7C7B\u540D\u540E\u7F00\u5B9A\u4F4D\u800C\u4E0D\u662F > :nth-child(2)\uFF1ADSH 0.2.2-rc.1 \u7684 AppFrame \u5728
+     <768px \u4F1A\u5F80 frame \u5F00\u5934\u63D2\u4E00\u4E2A div[data-sidebar-mask]\uFF0C\u5B50\u5143\u7D20\u987A\u5E8F\u53D8\u6210
+     mask \u2192 sidebarCol \u2192 centerCol \u2192 \u2026\u2026\uFF0C\u4F4D\u7F6E\u9009\u62E9\u5668\u4E8E\u662F\u6574\u4F53\u9519\u4F4D\u4E00\u683C\uFF0C\u4E3B\u5185\u5BB9
+     \u5217\u6362\u6210\u4FA7\u8FB9\u680F\u5217\u3001\u88AB\u538B\u8FDB 0 \u5BBD\u5EA6\uFF08issue #208/#209\uFF0C\u767D\u5C4F\uFF09\u3002\u7C7B\u540D\u540E\u7F00\u4E0D\u53D7
+     \u65B0\u589E\u5144\u5F1F\u8282\u70B9\u5F71\u54CD\u3002\u4E0D\u5E26\u524D\u5BFC\u4E0B\u5212\u7EBF\uFF1ACSS Modules \u7684\u5206\u9694\u7B26\uFF08hash_local
+     vs local_hash\uFF09\u662F\u914D\u7F6E\u9879\uFF0C\u53EA\u8BA4 centerCol \u8FD9\u6BB5\u66F4\u7A33\uFF08#207 \u5B9E\u6D4B\u540C\u6837\u547D\u4E2D\uFF09\u3002 */
+  [data-mobile-nav="frame"] > [class*="centerCol"] {
     grid-column: 1 !important;
     grid-row: 1 !important;
     min-width: 0 !important;
   }
 
-  /* The sidebar column (first grid child) becomes a left drawer. The drawer
+  /* The sidebar column becomes a left drawer. The drawer
      hugs the sidebar content exactly (the wide sidebar carries an inline
      width, ~280px): a fixed 92vw box would leave a white strip where the
      container background shows beside the content.
@@ -845,8 +852,12 @@ var MOBILE_CSS = `
      details pane 1000 and its full-screen frame ::after mask 1050 (issue
      #67: that mask sat on top of the 600 drawer and ate every tap). Still
      far under the fixed-position banners/toasts (z 9999) that float at the
-     viewport level. */
-  [data-mobile-nav="frame"] > :first-child {
+     viewport level.
+
+     Located by class-name suffix, not by "> :first-child" \u2014 0.2.2-rc.1 puts
+     div[data-sidebar-mask] first whenever it enters drawer mode (viewport
+     < 768px), which would otherwise hand the drawer styling to the mask. */
+  [data-mobile-nav="frame"] > [class*="sidebarCol"] {
     position: absolute !important;
     inset: 0 auto 0 0 !important;
     width: max-content !important;
@@ -876,8 +887,27 @@ var MOBILE_CSS = `
      overflow:hidden drawer to scrollLeft=102, and every static child (plus the
      fixed overlay) shifts 102px off-screen. With transform:none the overlay is
      viewport-anchored: it dims the full screen and the sheet sits at left:8. */
-  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > :first-child {
+  [data-mobile-nav="frame"]:not([data-sidebar-collapsed]) > [class*="sidebarCol"] {
     transform: none !important;
+  }
+
+  /* The official drawer mask (0.2.2-rc.1) goes away: it paints a second
+     backdrop next to ours and, worse, its own click handler calls
+     toggleSidebar() \u2014 while the client's outside-tap handler already closed
+     the drawer on the same tap. Two toggles cancel out, so the drawer looked
+     like it would not close (issue #208). The mobile stylesheet renders its
+     own backdrop and the client handles the tap. */
+  [data-mobile-nav="frame"] > [data-sidebar-mask] {
+    display: none !important;
+  }
+
+  /* 0.2.2-rc.1 ships its own drawer opener (button[data-sidebar-opener] in the
+     frame's leading seat). Two openers plus our FAB on one phone screen is one
+     entry point too many \u2014 and the official one sits where the session header
+     used to keep clear. When the host renders it, ours stands down. */
+  [data-mobile-nav="frame"]:has([data-sidebar-opener]) [data-mobile-nav="toggle"],
+  [data-mobile-nav="frame"]:has([data-sidebar-opener]) [data-mobile-nav="fab"] {
+    display: none !important;
   }
 
   /* Kill a competing full-screen mask (issue #67).

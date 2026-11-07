@@ -84,8 +84,8 @@ test('浮层内的点击被识别为 overlay（不该关抽屉）—— issue #7
 
 test('选择器常量与 MobileNavOverlay 的用法保持一致', () => {
   const src = readFileSync(new URL('../client/mobile/MobileNavOverlay.tsx', import.meta.url), 'utf8');
-  assert.equal(DRAWER_SELECTOR, '[data-mobile-nav="frame"] > :first-child');
-  assert.equal(TOGGLE_SELECTOR, '[data-mobile-nav="toggle"]');
+  assert.equal(DRAWER_SELECTOR, '[data-mobile-nav="frame"] > [class*="sidebarCol"]');
+  assert.equal(TOGGLE_SELECTOR, '[data-mobile-nav="toggle"], [data-sidebar-opener]');
   assert.ok(
     src.includes("document.querySelector<HTMLElement>(DRAWER_SELECTOR)"),
     '抽屉查询应复用 DRAWER_SELECTOR，避免与 CSS 里的选择器漂移',
@@ -126,7 +126,7 @@ test('抽屉层级压过 dsh-web-ui-all 的移动端遮罩 —— issue #67', ()
   // web-ui-all 0.3.6 的移动端响应式：sidebar pane 1100 / details pane 1000 /
   // frame ::after 全屏遮罩 1050。抽屉必须高于 1100，否则那层遮罩会盖在抽屉
   // 上吃掉每一次点击 —— 抽屉能开，但里面什么都点不动，页面也滚不了。
-  const drawerBlock = css.slice(css.indexOf('> :first-child {'));
+  const drawerBlock = css.slice(css.indexOf('> [class*="sidebarCol"] {'));
   const z = drawerBlock.match(/z-index:\s*(\d+)\s*!/);
   assert.ok(z, '抽屉必须显式声明 z-index !important');
   assert.ok(
@@ -150,6 +150,45 @@ test('移除 web-ui-all 在 frame 上的全屏 ::after 遮罩 —— issue #67',
   assert.ok(
     /\[data-mobile-nav="frame"\]\s*\[data-mobile-nav="frame"\]/.test(css),
     '遮罩规则要靠重复属性选择器提高优先级，不能依赖插件加载顺序',
+  );
+});
+
+test('宿主往 frame 头部插遮罩后，抽屉/主内容列不错位 —— issue #208/#209', () => {
+  const css = readFileSync(new URL('../client/mobile/mobile.css.ts', import.meta.url), 'utf8');
+  // DSH 0.2.2-rc.1 在 <768px 进 drawer 模式，先塞一个 div[data-sidebar-mask]，
+  // frame 的子元素整体后移一格。任何挂在 frame 直接子元素上的位置选择器都会
+  // 错位：主内容列被当成侧栏拉成抽屉、真正的 centerCol 留在 0 宽的第 2 轨，
+  // 手机上只剩背景（白屏）。所以 frame 级一律按类名后缀定位。
+  assert.ok(
+    /\[data-mobile-nav="frame"\]\s*>\s*\[class\*="centerCol"\]\s*\{/.test(css),
+    '主内容列必须按 [class*="centerCol"] 定位，不能再用 :nth-child(2)',
+  );
+  assert.ok(
+    /\[data-mobile-nav="frame"\]\s*>\s*\[class\*="sidebarCol"\]\s*\{/.test(css),
+    '抽屉必须按 [class*="sidebarCol"] 定位，不能再用 :first-child',
+  );
+  // 不带前导下划线：CSS Modules 的分隔符是配置项，只认类名主体更稳（#207）。
+  assert.ok(!/\[class\*="_sidebarCol"\]|\[class\*="_centerCol"\]/.test(css), '后缀匹配不要写死下划线');
+  assert.ok(
+    !/\[data-mobile-nav="frame"\][^{]*>\s*:(first|nth)-child/.test(css),
+    'frame 的直接子元素位置选择器必须清零 —— 宿主随时可能再插节点',
+  );
+
+  // 官方遮罩自带 toggleSidebar() 点击，和"点抽屉外就关"叠在一起会互相抵消。
+  assert.ok(
+    /\[data-mobile-nav="frame"\]\s*>\s*\[data-sidebar-mask\]\s*\{[^}]*display:\s*none\s*!/.test(css),
+    '官方 drawer mask 必须被隐藏，否则一次点击 toggle 两次',
+  );
+  assert.equal(DRAWER_SELECTOR, '[data-mobile-nav="frame"] > [class*="sidebarCol"]');
+  assert.match(TOGGLE_SELECTOR, /\[data-sidebar-opener\]/, '官方开合按钮同样要豁免"点外部就关"');
+});
+
+test('宿主自带开合按钮时，插件自己的入口让位', () => {
+  const css = readFileSync(new URL('../client/mobile/mobile.css.ts', import.meta.url), 'utf8');
+  assert.ok(
+    /\[data-mobile-nav="frame"\]:has\(\[data-sidebar-opener\]\)\s*\[data-mobile-nav="toggle"\]/.test(css) &&
+      /\[data-mobile-nav="frame"\]:has\(\[data-sidebar-opener\]\)\s*\[data-mobile-nav="fab"\]/.test(css),
+    '0.2.2 自带 data-sidebar-opener，同屏不要三个抽屉入口',
   );
 });
 
